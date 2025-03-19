@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <script>
+        // Welcome alert
+        alert("Welcome to our store!");
+
+        // Get customer details
+        let customerName = prompt("What is your name?");
+        let itemRequested = prompt("What would you like to order?");
+        let quantity = parseInt(prompt("How many would you like to order? (1-99)"));
+        
+        // Ensure valid quantity input
+        if (isNaN(quantity) || quantity < 1 || quantity > 99) {
+            alert("Invalid quantity! Defaulting to 1 item.");
+            quantity = 1;
+        }
+        
+        // Get current time
+        let now = new Date();
+        let hour = now.getHours();
+        let greeting;
+        
+        if (hour < 12) {
+            greeting = "Good Morning";
+        } else if (hour < 18) {
+            greeting = "Good Afternoon";
+        } else {
+            greeting = "Good Evening";
+        }
+        
+        // Calculate expected arrival date
+        let arrivalDate = new Date();
+        arrivalDate.setDate(now.getDate() + 7);
+        let arrivalString = arrivalDate.toDateString();
+        
+        // Display the order summary
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("greeting").innerText = `${greeting}, ${customerName}! Thank you for ordering.`;
+            document.getElementById("orderSummary").innerHTML = 
+                `You ordered <strong>${quantity}</strong> of <strong>${itemRequested}</strong>.`;
+            document.getElementById("arrival").innerText = `Your order will arrive on: ${arrivalString}`;
+        });
+    </script>
+</head>
+<body>
+    <h1 id="greeting"></h1>
+    <p id="orderSummary"></p>
+    <p id="arrival"></p>
+</body>
+</html>
