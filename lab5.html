@@ -50,37 +50,99 @@
         </div>
     </nav>
 
-    <!-- Registration Form -->
-    <div class="container mt-5">
-        <div class="card shadow p-4">
-            <h2 class="text-center mb-4">Register Your Account</h2>
-            <form id="registrationForm">
-                <div class="mb-3">
-                    <label for="firstName" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="firstName" required>
-                </div>
-                <div class="mb-3">
-                    <label for="lastName" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="lastName" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="email" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" required>
-                </div>
-                <div class="mb-3">
-                    <label for="dob" class="form-label">Date of Birth</label>
-                    <input type="date" class="form-control" id="dob" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Register</button>
-            </form>
-            <div id="output" class="mt-4"></div>
-        </div>
-    </div>
+<!-- form -->
+<div class="container mt-5">
+    <div class="card shadow p-4">
+        <h2 class="text-center mb-4">Create and Register Your Account</h2>
+        <form id="registration">
+            
+            <!--first name-->
+            <div class="mb-3">
+                <label for="first" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="first" required>
+            </div>
 
-    <script src="lab5.js"></script>
+            <!-- last Name -->
+            <div class="mb-3">
+                <label for="last" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="last" required>
+            </div>
+
+            <!-- email -->
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+
+            <!-- password -->
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+                <small class="text-muted">Must include "!" and "?"</small>
+            </div>
+
+            <!--birthday-->
+            <div class="mb-3">
+                <label for="birthday" class="form-label">Birthday</label>
+                <input type="date" class="form-control" id="birthday" required>
+            </div>
+
+            <!--submition-->
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+
+        <!-- Output Message -->
+        <div id="output" class="mt-4"></div>
+    </div>
+</div>
+
+    <script>
+        document.getElementById('registration').addEventListener('submit', function(event) {
+            event.preventDefault(); 
+
+            // connect js and html value names
+            const first = document.getElementById('first').value.trim();
+            const last = document.getElementById('last').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const birthday = document.getElementById('birthday').value;
+
+            // make sure there are no empty fields
+            if (!first || !last || !email || !password || !birthday) {
+                displayMessage('You must fill out all of the fields.', false);
+                return;
+            }
+
+            // make sure pw has both ! and ?
+            if (!(password.includes('!') && password.includes('?'))) {
+                displayMessage('Your password must include both "!" and "?".', false);
+                return;
+            }
+
+            // hide pw with stars
+            const user = {
+                first,
+                last,
+                email,
+                password: '*'.repeat(password.length), // replace a letter with a * for the length of the password
+                birthday
+            };
+
+            // repeat user info and display a success message
+            displayMessage(`Account Registration was successful! :)<br>
+                <strong>First Name:</strong> ${user.first}<br>
+                <strong>Last Name:</strong> ${user.last}<br>
+                <strong>Email:</strong> ${user.email}<br>
+                <strong>Password:</strong> ${user.password}<br>
+                <strong>Birthday:</strong> ${user.birthday}`, true);
+        });
+
+        // Function to display success or error message
+        function displayMessage(message, isSuccess) {
+            const output = document.getElementById('output');
+            output.innerHTML = `<div class="alert ${isSuccess ? 'alert-success' : 'alert-danger'}">${message}</div>`;
+        }
+    </script>
+
 </body>
 </html>
