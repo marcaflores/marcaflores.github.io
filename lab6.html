@@ -53,49 +53,49 @@
         </div>
     </nav>
 
-    <!-- Image to be updated -->
+    <!-- my cat image that will be updated from the api data -->
     <div class="text-center">
-        <img id="catImage" src="images/catcutie.jpg" alt="A cute cat" width="275" height="150">
+        <img id="catPic" src="images/catcutie.jpg" alt="first pic of a cute cat" width="275" height="150">
     </div>
     
     <div class="container text-center mt-5">
-        <h3>Cat Facts</h3>
-        <button id="loadDataBtn" class="btn btn-primary mb-3">Load Cat Facts</button>     
+        <h3>Facts</h3>
+        <button id="loadDataBtn" class="btn btn-primary mb-3">Click here for cat facts </button>     
         
-        <!-- Table to display facts -->
-        <table class="table table-bordered" id="factsTable">
+        <!-- tble for facts about cats -->
+        <table class="table table-bordered" id="catFacts">
             <thead>
                 <tr>
-                    <th>Fact ID</th>
-                    <th>Fact</th>
+                    <th>Fact Number # </th>
+                    <th>Cat Fact (=ↀωↀ=)✧</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Data will be populated here -->
+                <!-- this is where the data from the api will go -->
             </tbody>
         </table>
     </div>
 
     <script>
         $(document).ready(function() {
-            // When the button is clicked
+            // button clicked
             $('#loadDataBtn').click(function() {
-                // Make GET request to the API
+                // Get api
                 $.get('https://brianobruno.github.io/cats.json', function(data) {
-                    // Log the response to ensure data is received
-                    console.log("API Response: ", data);
+                    // log data
+                    console.log("api : ", data);
 
-                    // Extract the facts from the 'facts' array
+                    // get facts from the array facts
                     let facts = data.facts;
 
-                    // Sort the facts by factId
+                    // number and sort facts by factid
                     facts.sort(function(a, b) {
                         return a.factId - b.factId;
                     });
 
-                    // Populate the table with sorted data
-                    let tableBody = $('#factsTable tbody');
-                    tableBody.empty(); // Clear any existing rows
+                    // fill the table with the data
+                    let tableBody = $('#catFacts tbody');
+                    tableBody.empty();
                     facts.forEach(function(item) {
                         tableBody.append(`
                             <tr>
@@ -107,15 +107,15 @@
 
                     // Update the image with the new URL from the API
                     if (data.catPhoto) {
-                        console.log("Updating image URL: ", data.catPhoto);
-                        $('#catImage').attr('src', data.catPhoto);
+                        console.log("image updating: ", data.catPhoto);
+                        $('#catPic').attr('src', data.catPhoto);
                     } else {
-                        console.log("Image URL not found in response.");
+                        console.log("image url not found");
                     }
                 })
                 .fail(function() {
                     // Log error if request fails
-                    console.log("Failed to load data from API");
+                    console.log("Failed API");
                 });
             });
         });
