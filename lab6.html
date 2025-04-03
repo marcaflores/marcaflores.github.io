@@ -53,48 +53,72 @@
         </div>
     </nav>
 
-    <div class="container mt-4 text-center">
-        <h2>Cat Facts</h2>
-        <button class="btn btn-primary" onclick="fetchCatFacts()">Load Cat Facts</button>
-        <table class="table table-bordered mt-3">
+    <!-- Image to be updated -->
+    <div class="text-center">
+        <img id="catImage" src="images/catcutie.jpg" alt="A cute cat" width="275" height="150">
+    </div>
+    
+    <div class="container text-center mt-5">
+        <h3>Cat Facts</h3>
+        <button id="loadDataBtn" class="btn btn-primary mb-3">Load Cat Facts</button>     
+        
+        <!-- Table to display facts -->
+        <table class="table table-bordered" id="factsTable">
             <thead>
                 <tr>
                     <th>Fact ID</th>
                     <th>Fact</th>
                 </tr>
             </thead>
-            <tbody id="cat-facts"></tbody>
+            <tbody>
+                <!-- Data will be populated here -->
+            </tbody>
         </table>
-        <h2>Cat Image</h2>
-        <img id="cat-image" src="https://via.placeholder.com/300" class="img-fluid mt-3" alt="Cat Image">
     </div>
 
     <script>
-        function fetchCatFacts() {
-            $.ajax({
-                url: "https://brianobruno.github.io/cats.json",
-                type: "GET",
-                dataType: "json",
-                success: function(data) {
-                    if (!data.facts || !data.image) {
-                        console.error('Invalid API response structure');
-                        return;
-                    }
-                    
-                    const tableBody = $('#cat-facts');
-                    tableBody.empty();
-                    data.facts.forEach((fact, index) => {
-                        const row = `<tr><td>${index + 1}</td><td>${fact}</td></tr>`;
-                        tableBody.append(row);
+        $(document).ready(function() {
+            // When the button is clicked
+            $('#loadDataBtn').click(function() {
+                // Make GET request to the API
+                $.get('https://brianobruno.github.io/cats.json', function(data) {
+                    // Log the response to ensure data is received
+                    console.log("API Response: ", data);
+
+                    // Extract the facts from the 'facts' array
+                    let facts = data.facts;
+
+                    // Sort the facts by factId
+                    facts.sort(function(a, b) {
+                        return a.factId - b.factId;
                     });
-                    
-                    $('#cat-image').attr('src', data.image);
-                },
-                error: function() {
-                    console.error('Error fetching data');
-                }
+
+                    // Populate the table with sorted data
+                    let tableBody = $('#factsTable tbody');
+                    tableBody.empty(); // Clear any existing rows
+                    facts.forEach(function(item) {
+                        tableBody.append(`
+                            <tr>
+                                <td>${item.factId}</td>
+                                <td>${item.text}</td>
+                            </tr>
+                        `);
+                    });
+
+                    // Update the image with the new URL from the API
+                    if (data.catPhoto) {
+                        console.log("Updating image URL: ", data.catPhoto);
+                        $('#catImage').attr('src', data.catPhoto);
+                    } else {
+                        console.log("Image URL not found in response.");
+                    }
+                })
+                .fail(function() {
+                    // Log error if request fails
+                    console.log("Failed to load data from API");
+                });
             });
-        }
+        });
     </script>
 </body>
 </html>
