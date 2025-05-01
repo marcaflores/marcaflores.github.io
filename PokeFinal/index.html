@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+  <title>Pokémon Explorer - Marc Flores</title>
+
+  <style>
+    body {
+      background: url('blackPoke.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #f8f9fa;
+    }
+
+    .navbar, .jumbotron {
+      background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .nav-link, .navbar-brand {
+      color: #f8f9fa !important;
+    }
+
+    .card {
+      background-color: rgba(30, 30, 30, 0.9);
+      color: #f8f9fa;
+      border: 1px solid #dc3545;
+    }
+
+    .btn-primary {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .btn-primary:hover {
+      background-color: #c82333;
+      border-color: #bd2130;
+    }
+
+    .card-img-top {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body onscroll="checkScroll()">
+  <!-- Jumbotron -->
+  <div class="jumbotron jumbotron-fluid py-4 mb-3">
+    <div class="container text-center">
+      <h1 class="display-4">Pokémon Explorer</h1>
+      <p class="lead">CSC 225 Final Project — Marc Flores</p>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Home</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="abilities.html">Abilities</a></li>
+          <li class="nav-item"><a class="nav-link" href="types.html">Types</a></li>
+          <li class="nav-item"><a class="nav-link" href="generations.html">Generations</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Search Bar -->
+  <div class="container mb-4">
+    <div class="input-group">
+      <input type="text" id="search-bar" class="form-control" placeholder="Search Pokémon by name..." onkeyup="searchPokemon()">
+      <button class="btn btn-primary" type="button" onclick="searchPokemon()">Search</button>
+    </div>
+  </div>
+
+  <!-- Pokémon Cards Container -->
+  <div class="container">
+    <div id="pokemon-container" class="row g-4 justify-content-center">
+      <!-- Pokémon cards will load here -->
+    </div>
+  </div>
+
+  <script>
+    const container = document.getElementById("pokemon-container");
+    const searchInput = document.getElementById("search-bar");
+
+    let offset = 0;
+    const limit = 30;
+    const maxPokemon = 1025;
+    let loading = false;
+    let allPokemonNames = [];
+
+    // Preload all names
+    fetch("https://pokeapi.co/api/v2/pokemon?limit=1025")
+      .then(res => res.json())
+      .then(data => {
+        allPokemonNames = data.results;
+      });
+
+    function createCard(pokeData) {
+      const card = document.createElement("div");
+      card.className = "col-sm-6 col-md-4 col-lg-3 pokemon-card";
+      card.setAttribute("data-name", pokeData.name);
+
+      card.innerHTML = `
+        <div class="card h-100 text-center shadow-sm">
+          <img src="${pokeData.sprites.front_default}" class="card-img-top mx-auto" alt="${pokeData.name}">
+          <div class="card-body">
+            <h5 class="card-title text-capitalize">#${pokeData.id} ${pokeData.name}</h5>
+            <a href="details.html?name=${pokeData.name}" class="btn btn-primary btn-sm">View Details</a>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    }
+
+    function loadPokemon() {
+      if (loading) return;
+      loading = true;
+
+      fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=${limit}`)
+        .then(response => response.json())
+        .then(data => {
+          const fetches = data.results.map(pokemon => fetch(pokemon.url).then(res => res.json()));
+          Promise.all(fetches).then(allData => {
+            allData.sort((a, b) => a.id - b.id);
+            allData.forEach(pokeData => {
+              if (pokeData.id >= 10000) return;
+              createCard(pokeData);
+            });
+            offset += limit;
+            loading = false;
+          });
+        })
+        .catch(error => {
+          console.error("Error loading Pokémon:", error);
+          loading = false;
+        });
+    }
+
+    function searchPokemon() {
+      const query = searchInput.value.trim().toLowerCase();
+      container.innerHTML = "";
+
+      if (query === "") {
+        offset = 0;
+        loadPokemon();
+        return;
+      }
+
+      const matches = allPokemonNames.filter(p => p.name.includes(query));
+      if (matches.length === 0) {
+        container.innerHTML = `<p class="text-center mt-4 text-danger">No Pokémon found matching "${query}".</p>`;
+        return;
+      }
+
+      matches.forEach(match => {
+        fetch(match.url)
+          .then(res => res.json())
+          .then(pokeData => {
+            if (pokeData.id < 10000) {
+              createCard(pokeData);
+            }
+          });
+      });
+    }
+
+    function checkScroll() {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+        if (offset < maxPokemon) {
+          loadPokemon();
+        }
+      }
+    }
+
+    // Initial load
+    loadPokemon();
+  </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+  <title>Pokémon Details - Marc Flores</title>
+
+  <style>
+    body {
+      background: url('blackPoke.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #f8f9fa;
+    }
+
+    .navbar, .jumbotron {
+      background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .nav-link, .navbar-brand {
+      color: #f8f9fa !important;
+    }
+
+    .card {
+      background-color: rgba(30, 30, 30, 0.9);
+      color: #f8f9fa;
+      border: 1px solid #dc3545;
+    }
+
+    .btn-primary {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .btn-primary:hover {
+      background-color: #c82333;
+      border-color: #bd2130;
+    }
+
+    .type-badge {
+      padding: 5px 10px;
+      border-radius: 15px;
+      color: #fff;
+      font-weight: bold;
+      margin: 2px;
+      display: inline-block;
+    }
+
+    .stat-bar {
+      height: 20px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Jumbotron -->
+  <div class="jumbotron jumbotron-fluid py-4 mb-3">
+    <div class="container text-center">
+      <h1 class="display-4">Pokémon Details</h1>
+      <p class="lead">CSC 225 Final Project — Marc Flores</p>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Home</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="abilities.html">Abilities</a></li>
+          <li class="nav-item"><a class="nav-link" href="types.html">Types</a></li>
+          <li class="nav-item"><a class="nav-link" href="generations.html">Generations</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Pokémon Details Container -->
+  <div class="container">
+    <div id="pokemon-details" class="row justify-content-center">
+      <!-- Pokémon info will load here -->
+    </div>
+  </div>
+
+  <script>
+    const typeColors = {
+      normal: "#A8A77A", fire: "#EE8130", water: "#6390F0", electric: "#F7D02C",
+      grass: "#7AC74C", ice: "#96D9D6", fighting: "#C22E28", poison: "#A33EA1",
+      ground: "#E2BF65", flying: "#A98FF3", psychic: "#F95587", bug: "#A6B91A",
+      rock: "#B6A136", ghost: "#735797", dragon: "#6F35FC", dark: "#705746",
+      steel: "#B7B7CE", fairy: "#D685AD"
+    };
+
+    const detailsContainer = document.getElementById("pokemon-details");
+
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    function loadPokemon(name) {
+      fetch(`https://pokeapi.co/api/v2/pokemon/${name}`)
+        .then(response => response.json())
+        .then(pokemon => {
+          const types = pokemon.types.map(type => `
+            <span class="type-badge" style="background-color:${typeColors[type.type.name]};">
+              ${type.type.name}
+            </span>
+          `).join('');
+
+          const abilities = pokemon.abilities.map(ability => `<li>${ability.ability.name}</li>`).join('');
+
+          const stats = pokemon.stats.map(stat => `
+            <div>
+              <strong>${stat.stat.name}</strong> (${stat.base_stat})
+              <div class="stat-bar" style="width: ${stat.base_stat/2}%; background-color: ${typeColors[pokemon.types[0].type.name]};"></div>
+            </div>
+          `).join('');
+
+          const detailsCard = `
+            <div class="col-md-8">
+              <div class="card text-center p-4">
+                <h2 class="text-capitalize">#${pokemon.id} ${pokemon.name}</h2>
+
+                <div class="row my-3">
+                  <div class="col-md-6">
+                    <h6>Normal</h6>
+                    <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" class="img-fluid" style="width:150px;">
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Shiny</h6>
+                    <img src="${pokemon.sprites.front_shiny}" alt="Shiny ${pokemon.name}" class="img-fluid" style="width:150px;">
+                  </div>
+                </div>
+
+                ${pokemon.sprites.other['official-artwork'].front_default ? `
+                <div class="my-3">
+                  <h5>Official Artwork</h5>
+                  <img src="${pokemon.sprites.other['official-artwork'].front_default}" alt="Official Artwork" class="img-fluid" style="max-width: 250px;">
+                </div>` : ''}
+
+                <h5 class="mt-4">Type(s)</h5>
+                <p>${types}</p>
+
+                <h5>Height</h5>
+                <p>${pokemon.height / 10} m</p>
+
+                <h5>Weight</h5>
+                <p>${pokemon.weight / 10} kg</p>
+
+                <h5>Abilities</h5>
+                <ul class="list-unstyled">${abilities}</ul>
+
+                <h5>Base Stats</h5>
+                ${stats}
+
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                  <a href="details.html?name=${pokemon.id - 1}" class="btn btn-primary">Prev Pokémon</a>
+                  <a href="index.html" class="btn btn-primary">Back to List</a>
+                  <a href="details.html?name=${pokemon.id + 1}" class="btn btn-primary">Next Pokémon</a>
+                </div>
+              </div>
+            </div>
+          `;
+
+          detailsContainer.innerHTML = detailsCard;
+        })
+        .catch(error => {
+          console.error("Error loading Pokémon details:", error);
+          detailsContainer.innerHTML = `<p class="text-danger">Pokémon not found. Try another one.</p>`;
+        });
+    }
+
+    const pokemonName = getQueryParam("name");
+    if (pokemonName) {
+      loadPokemon(pokemonName);
+    } else {
+      detailsContainer.innerHTML = `<p class="text-danger">No Pokémon selected.</p>`;
+    }
+  </script>
+</body>
+</html>
