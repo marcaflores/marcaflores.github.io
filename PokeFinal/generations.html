@@ -43,22 +43,6 @@
       background-color: #c82333;
       border-color: #bd2130;
     }
-
-    .pokemon-thumb {
-      display: inline-block;
-      margin: 5px;
-      text-align: center;
-    }
-
-    .pokemon-thumb img {
-      width: 80px;
-      height: 80px;
-    }
-
-    .pokemon-thumb p {
-      margin: 0;
-      font-size: 0.9rem;
-    }
   </style>
 </head>
 
@@ -96,10 +80,10 @@
     </div>
   </div>
 
-  <!-- Generations List Container -->
+  <!-- Generations Container -->
   <div class="container">
     <div id="generations-container" class="row g-4 justify-content-center">
-      <!-- Generation cards will go here -->
+      <!-- Generation cards will be loaded here -->
     </div>
   </div>
 
@@ -116,45 +100,24 @@
             generations.sort((a, b) => a.id - b.id);
 
             generations.forEach(gen => {
+              const pokemonList = gen.pokemon_species
+                .map(p => `<li class="text-capitalize">${p.name}</li>`)
+                .join("");
+
               const card = document.createElement("div");
-              card.className = "col-sm-6 col-md-4 col-lg-3 generation-card";
+              card.className = "col-md-6 generation-card";
               card.setAttribute("data-name", gen.name);
 
               card.innerHTML = `
-                <div class="card h-100 text-center shadow-sm">
+                <div class="card h-100 shadow-sm">
                   <div class="card-body">
-                    <h5 class="card-title text-capitalize">${gen.name.replace('-', ' ')}</h5>
-                    <div id="sprites-${gen.name}" class="d-flex flex-wrap justify-content-center">
-                      <p>Loading...</p>
-                    </div>
+                    <h5 class="card-title text-capitalize">${gen.name.replace("-", " ")}</h5>
+                    <ul>${pokemonList}</ul>
                   </div>
                 </div>
               `;
 
               container.appendChild(card);
-
-              const spriteContainer = card.querySelector(`#sprites-${gen.name}`);
-              const pokemonEntries = gen.pokemon_species.slice(0, 12); // limit per gen for speed
-
-              Promise.all(
-                pokemonEntries.map(species =>
-                  fetch(`https://pokeapi.co/api/v2/pokemon/${species.name}`).then(res => res.json())
-                )
-              ).then(pokemonList => {
-                spriteContainer.innerHTML = "";
-                pokemonList.forEach(poke => {
-                  if (poke.id < 10000) {
-                    spriteContainer.innerHTML += `
-                      <div class="pokemon-thumb">
-                        <a href="details.html?name=${poke.name}">
-                          <img src="${poke.sprites.front_default}" alt="${poke.name}">
-                          <p class="text-capitalize">${poke.name}</p>
-                        </a>
-                      </div>
-                    `;
-                  }
-                });
-              });
             });
           });
         });
