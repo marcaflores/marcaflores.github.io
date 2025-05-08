@@ -29,50 +29,27 @@
     }
 
     .card {
-      background-color: rgba(30, 30, 30, 0.9);
       color: #f8f9fa;
       border: 1px solid #dc3545;
-    }
-
-    .btn-primary {
-      background-color: #dc3545;
-      border-color: #dc3545;
-    }
-
-    .btn-primary:hover {
-      background-color: #c82333;
-      border-color: #bd2130;
-    }
-
-    .type-badge {
-      padding: 5px 10px;
-      border-radius: 15px;
-      color: #fff;
-      font-weight: bold;
-      margin: 5px;
-      display: inline-block;
-    }
-
-    .pokemon-thumb {
-      display: inline-block;
-      margin: 5px;
       text-align: center;
+      transition: transform 0.2s;
     }
 
-    .pokemon-thumb img {
-      width: 80px;
-      height: 80px;
+    .card:hover {
+      transform: scale(1.03);
+      cursor: pointer;
     }
 
-    .pokemon-thumb p {
-      margin: 0;
-      font-size: 0.9rem;
+    .type-card {
+      font-weight: bold;
+      text-transform: capitalize;
+      font-size: 1.25rem;
+      padding: 2rem 0;
     }
   </style>
 </head>
 
-<body>
-  <!-- Jumbotron -->
+<body onload="loadTypes()">
   <div class="jumbotron jumbotron-fluid py-4 mb-3">
     <div class="container text-center">
       <h1 class="display-4">Pokémon Types</h1>
@@ -80,41 +57,29 @@
     </div>
   </div>
 
-  <!-- Navigation Bar -->
   <nav class="navbar navbar-expand-lg mb-4">
     <div class="container">
       <a class="navbar-brand" href="index.html">Home</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" href="abilities.html">Abilities</a></li>
-          <li class="nav-item"><a class="nav-link" href="types.html">Types</a></li>
+          <li class="nav-item"><a class="nav-link active" href="types.html">Types</a></li>
           <li class="nav-item"><a class="nav-link" href="generations.html">Generations</a></li>
+          <li class="nav-item"><a class="nav-link" href="teamBuilder.html">Team Builder</a></li>
+
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- Search Bar -->
-  <div class="container mb-4">
-    <div class="input-group">
-      <input type="text" id="search-bar" class="form-control" placeholder="Search types..." onkeyup="searchTypes()">
-      <button class="btn btn-primary" type="button" onclick="searchTypes()">Search</button>
-    </div>
-  </div>
-
-  <!-- Types List Container -->
   <div class="container">
-    <div id="types-container" class="row g-4 justify-content-center">
-      <!-- Type cards will load here -->
+    <div class="row g-4 justify-content-center" id="types-container">
+      <!-- Type cards will go here -->
     </div>
   </div>
 
   <script>
     const container = document.getElementById("types-container");
-    const searchInput = document.getElementById("search-bar");
 
     const typeColors = {
       normal: "#A8A77A", fire: "#EE8130", water: "#6390F0", electric: "#F7D02C",
@@ -126,71 +91,32 @@
 
     function loadTypes() {
       fetch("https://pokeapi.co/api/v2/type")
-        .then(res => res.json())
+        .then(response => response.json())
         .then(data => {
-          const typeFetches = data.results.map(type => fetch(type.url).then(res => res.json()));
+          const filteredTypes = data.results.filter(t => !["shadow", "unknown"].includes(t.name));
 
-          Promise.all(typeFetches).then(types => {
-            types = types.filter(type => type.pokemon.length > 0);
-            types.sort((a, b) => a.id - b.id);
+          filteredTypes.forEach(type => {
+            const typeColor = typeColors[type.name] || "#dc3545";
 
-            types.forEach(type => {
-              const typeColor = typeColors[type.name] || "#dc3545";
+            const card = document.createElement("div");
+            card.className = "col-sm-6 col-md-4 col-lg-3";
 
-              const card = document.createElement("div");
-              card.className = "col-sm-6 col-md-4 col-lg-3 type-card";
-              card.setAttribute("data-name", type.name);
-
-              card.innerHTML = `
-                <div class="card h-100 text-center shadow-sm">
-                  <div class="card-body">
-                    <h5 class="card-title">
-                      <span class="type-badge" style="background-color:${typeColor};">${type.name}</span>
-                    </h5>
-                    <div id="sprites-${type.name}" class="d-flex flex-wrap justify-content-center my-2">
-                      <p>Loading...</p>
-                    </div>
-                  </div>
+            card.innerHTML = `
+              <a href="typeDetails.html?type=${type.name}" style="text-decoration: none;">
+                <div class="card shadow-sm type-card" style="background-color:${typeColor};">
+                  ${type.name}
                 </div>
-              `;
+              </a>
+            `;
 
-              container.appendChild(card);
-
-              const spriteContainer = card.querySelector(`#sprites-${type.name}`);
-              const pokemonEntries = type.pokemon.slice(0, 12); // Limit to 12 per type to avoid lag
-
-              Promise.all(pokemonEntries.map(p => fetch(p.pokemon.url).then(res => res.json())))
-                .then(pokemons => {
-                  spriteContainer.innerHTML = "";
-                  pokemons.forEach(poke => {
-                    if (poke.id < 10000) {
-                      spriteContainer.innerHTML += `
-                        <div class="pokemon-thumb">
-                          <a href="details.html?name=${poke.name}">
-                            <img src="${poke.sprites.front_default}" alt="${poke.name}">
-                            <p class="text-capitalize">${poke.name}</p>
-                          </a>
-                        </div>
-                      `;
-                    }
-                  });
-                });
-            });
+            container.appendChild(card);
           });
+        })
+        .catch(err => {
+          console.error("Failed to load types:", err);
+          container.innerHTML = `<p class="text-danger text-center">Could not load types.</p>`;
         });
     }
-
-    function searchTypes() {
-      const query = searchInput.value.toLowerCase();
-      const cards = document.querySelectorAll(".type-card");
-
-      cards.forEach(card => {
-        const name = card.getAttribute("data-name");
-        card.style.display = name.includes(query) ? "block" : "none";
-      });
-    }
-
-    loadTypes();
   </script>
 </body>
 </html>

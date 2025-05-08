@@ -32,6 +32,16 @@
       background-color: rgba(30, 30, 30, 0.9);
       color: #f8f9fa;
       border: 1px solid #dc3545;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+    }
+
+    .card-img-top {
+      object-fit: cover;
+      height: 200px;
     }
 
     .btn-primary {
@@ -46,7 +56,7 @@
   </style>
 </head>
 
-<body>
+<body onload="loadGenerations()">
   <!-- Jumbotron -->
   <div class="jumbotron jumbotron-fluid py-4 mb-3">
     <div class="container text-center">
@@ -59,82 +69,67 @@
   <nav class="navbar navbar-expand-lg mb-4">
     <div class="container">
       <a class="navbar-brand" href="index.html">Home</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           <li class="nav-item"><a class="nav-link" href="abilities.html">Abilities</a></li>
           <li class="nav-item"><a class="nav-link" href="types.html">Types</a></li>
-          <li class="nav-item"><a class="nav-link" href="generations.html">Generations</a></li>
+          <li class="nav-item"><a class="nav-link active" href="generations.html">Generations</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- Search Bar -->
-  <div class="container mb-4">
-    <div class="input-group">
-      <input type="text" id="search-bar" class="form-control" placeholder="Search generations..." onkeyup="searchGenerations()">
-      <button class="btn btn-primary" type="button" onclick="searchGenerations()">Search</button>
-    </div>
-  </div>
-
-  <!-- Generations Container -->
+  <!-- Generation Cards -->
   <div class="container">
-    <div id="generations-container" class="row g-4 justify-content-center">
-      <!-- Generation cards will be loaded here -->
-    </div>
+    <div class="row g-4" id="generations-container"></div>
   </div>
 
   <script>
     const container = document.getElementById("generations-container");
-    const searchInput = document.getElementById("search-bar");
+
+    const mapImages = {
+      "generation-i": "MapofKanto.png",
+      "generation-ii": "MapofJohto.png",
+      "generation-iii": "MapofHoenn.png",
+      "generation-iv": "MapofSinnoh.png",
+      "generation-v": "MapofUnova.png",
+      "generation-vi": "MapofKalos.png",
+      "generation-vii": "MapofAlola.png",
+      "generation-viii": "MapofGalar.jpg",
+      "generation-ix": "MapofPaldea.png"
+    };
 
     function loadGenerations() {
       fetch("https://pokeapi.co/api/v2/generation")
         .then(res => res.json())
         .then(data => {
-          const fetches = data.results.map(gen => fetch(gen.url).then(res => res.json()));
-          Promise.all(fetches).then(generations => {
-            generations.sort((a, b) => a.id - b.id);
+          // Sort by generation ID
+          data.results.sort((a, b) => {
+            const idA = parseInt(a.url.split("/").filter(Boolean).pop());
+            const idB = parseInt(b.url.split("/").filter(Boolean).pop());
+            return idA - idB;
+          });
 
-            generations.forEach(gen => {
-              const pokemonList = gen.pokemon_species
-                .map(p => `<li class="text-capitalize">${p.name}</li>`)
-                .join("");
+          data.results.forEach(gen => {
+            const img = mapImages[gen.name] || "default.png";
+            const title = gen.name.replace("-", " ");
 
-              const card = document.createElement("div");
-              card.className = "col-md-6 generation-card";
-              card.setAttribute("data-name", gen.name);
-
-              card.innerHTML = `
-                <div class="card h-100 shadow-sm">
+            const card = document.createElement("div");
+            card.className = "col-md-4";
+            card.innerHTML = `
+              <a href="detailsGeneration.html?gen=${gen.name}" style="text-decoration: none;">
+                <div class="card h-100 text-center shadow-sm">
+                  <img src="${img}" class="card-img-top" alt="${title}">
                   <div class="card-body">
-                    <h5 class="card-title text-capitalize">${gen.name.replace("-", " ")}</h5>
-                    <ul>${pokemonList}</ul>
+                    <h5 class="card-title text-capitalize">${title}</h5>
                   </div>
                 </div>
-              `;
-
-              container.appendChild(card);
-            });
+              </a>
+            `;
+            container.appendChild(card);
           });
         });
     }
-
-    function searchGenerations() {
-      const query = searchInput.value.toLowerCase();
-      const cards = document.querySelectorAll(".generation-card");
-
-      cards.forEach(card => {
-        const name = card.getAttribute("data-name");
-        card.style.display = name.includes(query) ? "block" : "none";
-      });
-    }
-
-    
-    loadGenerations();
   </script>
 </body>
 </html>

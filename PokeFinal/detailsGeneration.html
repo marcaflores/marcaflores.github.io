@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+  <title>Generation Details - Marc Flores</title>
+
+  <style>
+    body {
+      background: url('blackPoke.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #f8f9fa;
+    }
+
+    .navbar, .jumbotron {
+      background-color: rgba(0, 0, 0, 0.85);
+    }
+
+    .nav-link, .navbar-brand {
+      color: #f8f9fa !important;
+    }
+
+    .card {
+      background-color: rgba(30, 30, 30, 0.9);
+      color: #f8f9fa;
+      border: 1px solid #dc3545;
+    }
+
+    .btn-primary {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .btn-primary:hover {
+      background-color: #c82333;
+      border-color: #bd2130;
+    }
+
+    .card-img-top {
+      max-height: 250px;
+      object-fit: cover;
+    }
+
+    .pokemon-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    .pokemon-card {
+      width: 80px;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    .pokemon-card img {
+      width: 72px;
+      height: 72px;
+    }
+  </style>
+</head>
+
+<body onload="loadGeneration()">
+  <div class="jumbotron jumbotron-fluid py-4 mb-3">
+    <div class="container text-center">
+      <h1 class="display-4">Generation Details</h1>
+      <p class="lead">CSC 225 Final Project — Marc Flores</p>
+    </div>
+  </div>
+
+  <nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Home</a>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="abilities.html">Abilities</a></li>
+          <li class="nav-item"><a class="nav-link" href="types.html">Types</a></li>
+          <li class="nav-item"><a class="nav-link active" href="generations.html">Generations</a></li>
+          <li class="nav-item"><a class="nav-link" href="teamBuilder.html">Team Builder</a></li>
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="generation-details" class="row justify-content-center">
+      <!-- Loaded via JS -->
+    </div>
+  </div>
+
+  <script>
+    const detailsContainer = document.getElementById("generation-details");
+
+    const mapImages = {
+      "generation-i": "MapofKanto.png",
+      "generation-ii": "MapofJohto.png",
+      "generation-iii": "MapofHoenn.png",
+      "generation-iv": "MapofSinnoh.png",
+      "generation-v": "MapofUnova.png",
+      "generation-vi": "MapofKalos.png",
+      "generation-vii": "MapofAlola.png",
+      "generation-viii": "MapofGalar.jpg",
+      "generation-ix": "MapofPaldea.png"
+    };
+
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    function extractIdFromUrl(url) {
+      const parts = url.split("/").filter(Boolean);
+      return parseInt(parts[parts.length - 1]);
+    }
+
+    function loadGeneration() {
+      const genName = getQueryParam("gen");
+      if (!genName) {
+        detailsContainer.innerHTML = "<p class='text-danger'>No generation selected.</p>";
+        return;
+      }
+
+      fetch(`https://pokeapi.co/api/v2/generation/${genName}`)
+        .then(res => res.json())
+        .then(gen => {
+          const region = gen.main_region.name;
+          const games = gen.version_groups.map(g => g.name.replace(/-/g, " ")).join(", ");
+          const mapImage = mapImages[gen.name] || "default.png";
+
+          const sortedSpecies = gen.pokemon_species
+            .map(p => ({ name: p.name, id: extractIdFromUrl(p.url) }))
+            .sort((a, b) => a.id - b.id);
+
+          const spriteGrid = sortedSpecies.map(p => `
+            <div class="pokemon-card">
+              <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}">
+              <div class="text-capitalize">${p.name}</div>
+            </div>
+          `).join("");
+
+          const html = `
+            <div class="col-md-10">
+              <div class="card text-center p-4">
+                <h2 class="text-capitalize">${gen.name.replace("-", " ")}</h2>
+                <img src="${mapImage}" class="card-img-top my-3" alt="${region} Map">
+                <p><strong>Region:</strong> ${region}</p>
+                <p><strong>Games:</strong> ${games}</p>
+                <h5>Pokémon Introduced:</h5>
+                <div class="pokemon-grid">${spriteGrid}</div>
+                <div class="mt-4">
+                  <a href="generations.html" class="btn btn-primary">Back to Generations</a>
+                </div>
+              </div>
+            </div>
+          `;
+
+          detailsContainer.innerHTML = html;
+        })
+        .catch(error => {
+          console.error("Error loading generation:", error);
+          detailsContainer.innerHTML = `<p class="text-danger">Failed to load generation data.</p>`;
+        });
+    }
+  </script>
+</body>
+</html>
