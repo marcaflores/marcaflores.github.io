@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Be My Valentine?</title>
+    <style>
+        body {
+            background-color: #ffe4e1; /* Misty Rose */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.3);
+            border: 2px solid #ffb6c1;
+        }
+
+        h1 {
+            color: #ff1493;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #yesBtn {
+            background-color: #ff69b4;
+            color: white;
+        }
+
+        #yesBtn:hover {
+            background-color: #ff1493;
+            transform: scale(1.1);
+        }
+
+        #noBtn {
+            background-color: #fbcfdf;
+            color: #ff1493;
+            position: relative;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .heart {
+            color: #ff1493;
+            font-size: 50px;
+            margin-bottom: 10px;
+            animation: beat 1s infinite;
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainCard">
+        <div class="heart">❤️</div>
+        <h1 id="question">Will you be my Valentine?</h1>
+        <div class="buttons">
+            <button id="yesBtn">YES!</button>
+            <button id="noBtn">No</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="successMessage">
+        <div class="heart">💖</div>
+        <h1>Yay! I knew you'd say yes!</h1>
+        <p>I love you!</p>
+    </div>
+
+    <script>
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const mainCard = document.getElementById('mainCard');
+        const successMessage = document.getElementById('successMessage');
+
+        // Make the "No" button run away
+        noBtn.addEventListener('mouseover', () => {
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+            
+            noBtn.style.position = 'absolute';
+            noBtn.style.left = x + 'px';
+            noBtn.style.top = y + 'px';
+        });
+
+        // Show success message when "Yes" is clicked
+        yesBtn.addEventListener('click', () => {
+            mainCard.classList.add('hidden');
+            successMessage.classList.remove('hidden');
+        });
+    </script>
+
+</body>
+</html>
