@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Will You Be My Valentine?</title>
+    <title>Be My Valentine?</title>
     <style>
         body {
             background-color: #ffe4e1; /* Misty Rose */
@@ -20,15 +20,18 @@
 
         .container {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.3);
-            border: 2px solid #ffb6c1;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+            border: 3px solid #ffb6c1;
+            max-width: 400px;
+            width: 90%;
+            transition: all 0.5s ease;
         }
 
         h1 {
             color: #ff1493;
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin-bottom: 20px;
         }
 
@@ -42,15 +45,17 @@
         button {
             padding: 15px 30px;
             font-size: 1.2rem;
+            font-weight: bold;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background-color 0.2s;
         }
 
         #yesBtn {
             background-color: #ff69b4;
             color: white;
+            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.5);
         }
 
         #yesBtn:hover {
@@ -62,6 +67,7 @@
             background-color: #fbcfdf;
             color: #ff1493;
             position: relative;
+            z-index: 10;
         }
 
         .hidden {
@@ -70,14 +76,21 @@
 
         .heart {
             color: #ff1493;
-            font-size: 50px;
+            font-size: 60px;
             margin-bottom: 10px;
             animation: beat 1s infinite;
         }
 
+        #gifContainer img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
         @keyframes beat {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
+            50% { transform: scale(1.1); }
         }
     </style>
 </head>
@@ -95,7 +108,8 @@
     <div class="container hidden" id="successMessage">
         <div class="heart">💖</div>
         <h1>Yay! I knew you'd say yes!</h1>
-        <p>I love you!</p>
+        <div id="gifContainer"></div>
+        <p style="color: #ff1493; font-weight: bold; font-size: 1.2rem;">I love you!</p>
     </div>
 
     <script>
@@ -103,21 +117,33 @@
         const noBtn = document.getElementById('noBtn');
         const mainCard = document.getElementById('mainCard');
         const successMessage = document.getElementById('successMessage');
+        const gifContainer = document.getElementById('gifContainer');
 
-        // Make the "No" button run away
+        // Logic to make the "No" button dodge the mouse
         noBtn.addEventListener('mouseover', () => {
-            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+            // Calculate random positions within the viewport
+            const padding = 50;
+            const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - padding);
+            const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - padding);
             
-            noBtn.style.position = 'absolute';
+            noBtn.style.position = 'fixed';
             noBtn.style.left = x + 'px';
             noBtn.style.top = y + 'px';
         });
 
-        // Show success message when "Yes" is clicked
+        // What happens when she clicks "Yes"
         yesBtn.addEventListener('click', () => {
+            // Hide the question, show the success message
             mainCard.classList.add('hidden');
             successMessage.classList.remove('hidden');
+            
+            // Create and add the Milk & Mocha GIF
+            const gif = document.createElement('img');
+            // Using the direct GIF source from Giphy
+            gif.src = "https://media.giphy.com/media/kf3EjrAsKp3P9bhYHG/giphy.gif";
+            gif.alt = "Milk and Mocha Bears hugging";
+            
+            gifContainer.appendChild(gif);
         });
     </script>
 
